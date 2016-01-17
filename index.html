@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Hexo</title>
+  <title>No Fish</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
+<meta property="og:title" content="No Fish">
 <meta property="og:url" content="http://yoursite.com/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="No Fish">
 <meta property="og:description">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="No Fish">
 <meta name="twitter:description">
   
-    <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
+    <link rel="alternative" href="/atom.xml" title="No Fish" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -33,7 +33,7 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/" id="logo">Hexo</a>
+        <a href="/" id="logo">No Fish</a>
       </h1>
       
     </div>
@@ -83,11 +83,15 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>微信的项目中，使用的是MVC的经典模式，但为了避免C变得臃肿，我们经常抽象出一个Logic层，它一般是被C所引用。Logic层有时会需要持有C，此时我们会定义C为weak的，避开循环引用。这可以满足大部分的场景。</p>
+<p>但在微信支付中，使用了非经典的MVC，而是采用一个Logic会贯穿某个支付流程，Logic会持有一个数组，数组保存整个流程所有的ViewController。这个引发一个问题，ViewController在界面上消失之后，如果处理不当，就会一直被Logic所持有，最后泄露了。为了处理这个问题，我们需要一个弱引用的数组，它不会对存放于其中的对象的引用加1。</p>
+<p>本来是想自己实现这个weak array。转念一想，就先到github上寻找，果然发现了几个实现。其中有一个提到了object-c自带的一个容器：NSPointerArray。它不但可以作为弱引用数组，而且还可以存放非oc对象。</p>
+<p>一开始，我通过new生成NSPointerArray，实验之后发现它还是持有了它的元素。看了文档之后，才知道要使用它的类方法weakObjectsPointerArray生成实例。试了一把，效果一流。但是它的接口同NSMutableArray不太相同，在重构时不能直接替换，这个有点遗憾。有时间的话，可以简单封装一下，让它兼容NSMutableArray的接口，重构时就方便太多了。</p>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/17/Weak-Array-in-Obj-C/" data-id="cijile6xe0000qmtrv6a6og0c" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/17/Weak-Array-in-Obj-C/" data-id="cijimwipz00007wtraxxzb917" class="article-share-link">Share</a>
       
       
     </footer>
@@ -132,7 +136,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/28/hello-world/" data-id="cijile6yc0001qmtrwi54h49c" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/28/hello-world/" data-id="cijimwiqs00017wtroc6zxohs" class="article-share-link">Share</a>
       
       
     </footer>
@@ -188,7 +192,7 @@
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2016 John Doe<br>
+      &copy; 2016 Yong Lin<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
