@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Xcode Plugin Development | No Fish</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Xcode有一套完整的插件框架，但是Apple没有开放出来。所以现在的插件的实现方式，是使用函数替换的方式替换Xcode的私有库的函数，来定制自己的功能。私有库主要是DVKit和IDEKit。
+开发一个插件有如下过程：
+
+首先，要明确需求，我们想做一个怎么样的功能，这个功能是否已经有类似的插件了？
+其次，如果有类似插件，那最happy了，可以在这个插件的基础上开发我们的功能，那下面列到的大部分步骤">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Xcode Plugin Development">
+<meta property="og:url" content="http://yoursite.com/2016/01/31/Xcode-Plugin-Development/index.html">
+<meta property="og:site_name" content="No Fish">
+<meta property="og:description" content="Xcode有一套完整的插件框架，但是Apple没有开放出来。所以现在的插件的实现方式，是使用函数替换的方式替换Xcode的私有库的函数，来定制自己的功能。私有库主要是DVKit和IDEKit。
+开发一个插件有如下过程：
+
+首先，要明确需求，我们想做一个怎么样的功能，这个功能是否已经有类似的插件了？
+其次，如果有类似插件，那最happy了，可以在这个插件的基础上开发我们的功能，那下面列到的大部分步骤">
+<meta property="og:image" content="http://yoursite.com/2016/01/31/Xcode-Plugin-Development/1.png">
+<meta property="og:image" content="http://yoursite.com/2016/01/31/Xcode-Plugin-Development/2.png">
+<meta property="og:image" content="http://yoursite.com/2016/01/31/Xcode-Plugin-Development/3.png">
+<meta property="og:image" content="http://yoursite.com/2016/01/31/Xcode-Plugin-Development/4.png">
+<meta property="og:image" content="http://yoursite.com/2016/01/31/Xcode-Plugin-Development/5.png">
+<meta property="og:updated_time" content="2016-01-31T13:08:23.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Xcode Plugin Development">
+<meta name="twitter:description" content="Xcode有一套完整的插件框架，但是Apple没有开放出来。所以现在的插件的实现方式，是使用函数替换的方式替换Xcode的私有库的函数，来定制自己的功能。私有库主要是DVKit和IDEKit。
+开发一个插件有如下过程：
+
+首先，要明确需求，我们想做一个怎么样的功能，这个功能是否已经有类似的插件了？
+其次，如果有类似插件，那最happy了，可以在这个插件的基础上开发我们的功能，那下面列到的大部分步骤">
+  
+    <link rel="alternative" href="/atom.xml" title="No Fish" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">No Fish</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Xcode-Plugin-Development" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/01/31/Xcode-Plugin-Development/" class="article-date">
+  <time datetime="2016-01-31T07:00:00.000Z" itemprop="datePublished">2016-01-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Xcode Plugin Development
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Xcode有一套完整的插件框架，但是Apple没有开放出来。所以现在的插件的实现方式，是使用函数替换的方式替换Xcode的私有库的函数，来定制自己的功能。私有库主要是DVKit和IDEKit。</p>
+<p><strong>开发一个插件有如下过程：</strong></p>
+<ul>
+<li>首先，要明确需求，我们想做一个怎么样的功能，这个功能是否已经有类似的插件了？</li>
+<li>其次，如果有类似插件，那最happy了，可以在这个插件的基础上开发我们的功能，那下面列到的大部分步骤你都不用涉及到。否则就要按下面的步骤自己开发。即使在这种情况下，最好还是在github上找一个插件模板，或者在原有插件项目中抽出来的框架，上开发。</li>
+<li>再次，如果是自己开发，那就要看可能涉及到哪些xcode的逻辑、界面，然后利用下面的“前期准备”的方法来搜集相关素材。</li>
+<li>接着，就是开发和调试了。</li>
+<li>最后，写点脚本，发布给大家使用。</li>
+</ul>
+<h2 id="下面介绍重要环节的相关技术。">下面介绍重要环节的相关技术。</h2><h2 id="一、前期准备">一、前期准备</h2><p>这是最麻烦的过程。</p>
+<p>1.监听Notification：</p>
+<p>我们可以监听所有的Notification，从而获得</p>
+<ul>
+<li>用户操作的时机</li>
+<li>操作的UI控件（debugDescription可以得到更多的界面信息）</li>
+<li>操作的上下文</li>
+</ul>
+<p>2.Class-dump</p>
+<p>对于UI控件和一些Model对象，可能通过<a href="http://stevenygard.com/projects/class-dump/" target="_blank" rel="external">class-dump</a>找到其所有的接口。github上已经有人dump了<a href="https://github.com/luisobo/Xcode-RuntimeHeaders" target="_blank" rel="external">Xcode所有的类</a>。</p>
+<p>3.查看UI界面元素</p>
+<p>Github上的<a href="https://github.com/edwardaux/XcodeExplorer" target="_blank" rel="external">XcodeExplorer</a>可以方便查看XcodeUI元素。  （我还没测试过。。。）</p>
+<p>下面是在项目管理器上切换文件时收到的notification。<br><img src="/2016/01/31/Xcode-Plugin-Development/1.png" alt="image" title="image"></p>
+<h2 id="二、构建设置">二、构建设置</h2><p>如果你找到了一个类似的项目，或者在插件模板上开发，那这些设置你需要修改的就很少了。<br>下面这张图中，重要的几个参数：</p>
+<ul>
+<li>DVTPluginCompatibilityUUIDs，一个字符串数组，所有支持的Xcode版本的UUID。</li>
+<li>Principal class：字符串，插件的加载入口在这个类中。<img src="/2016/01/31/Xcode-Plugin-Development/2.png" alt="image" title="image">
+</li>
+</ul>
+<h2 id="三、调试设置">三、调试设置</h2><p>这样设置之后，build成功就可以调起Xcode来进行调试了。<br><img src="/2016/01/31/Xcode-Plugin-Development/3.png" alt="image" title="image"><br><img src="/2016/01/31/Xcode-Plugin-Development/4.png" alt="image" title="image"></p>
+<h2 id="四、开发">四、开发</h2><p>1  入口：这个类由plst中的Principal class来指定。建议采用单例模式。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">static</span> XCEPlugin *mySharedPlugin = <span class="literal">nil</span>;</span><br><span class="line"></span><br><span class="line">+(<span class="keyword">void</span>)pluginDidLoad:(<span class="built_in">NSBundle</span> *)plugin &#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">	<span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">		mySharedPlugin = [[<span class="keyword">self</span> alloc] init];</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+(XCEPlugin *)sharedPlugin &#123;</span><br><span class="line">	<span class="keyword">return</span> mySharedPlugin;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(<span class="keyword">id</span>)init &#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">self</span> = [<span class="keyword">super</span> init]) &#123;</span><br><span class="line">		[<span class="keyword">self</span> addMenuItems];</span><br><span class="line">		[<span class="keyword">self</span> setNotificationsController:<span class="literal">nil</span>];</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>2  举例1：弹窗口</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">-(<span class="keyword">void</span>)viewClickerMenuClicked:(<span class="keyword">id</span>)sender &#123;</span><br><span class="line">	<span class="keyword">if</span> ([<span class="keyword">self</span> viewClickerController] == <span class="literal">nil</span>) &#123;</span><br><span class="line">		[<span class="keyword">self</span> setViewClickerController:[[XCEViewClickerWindowController alloc] init]];</span><br><span class="line">	&#125;</span><br><span class="line">	[[<span class="keyword">self</span> viewClickerController] showWindow:[<span class="built_in">NSApp</span> mainWindow]];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>3  举例2：获得文本编辑器</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="built_in">NSWindowController</span> *currentWindowController = [[<span class="built_in">NSApp</span> keyWindow] windowController]; </span><br><span class="line"><span class="keyword">if</span> ([currentWindowController isKindOfClass:<span class="built_in">NSClassFromString</span>(<span class="string">@"IDEWorkspaceWindowController"</span>)]) &#123; </span><br><span class="line"> IDEWorkspaceWindowController *workspaceController = (IDEWorkspaceWindowController *)currentWindowController; </span><br><span class="line"> IDEEditorArea *editorArea = [workspaceController editorArea]; </span><br><span class="line"> IDEEditorContext *editorContext = [editorArea lastActiveEditorContext]; </span><br><span class="line"> IDESourceCodeEditor *editor = [editorContext editor]; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="五、发布配置（部署到当前插件目录）">五、发布配置（部署到当前插件目录）</h2><p>第2个红框，一起组成了部署路径： /Users/你的用户名/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins<br><img src="/2016/01/31/Xcode-Plugin-Development/5.png" alt="image" title="image"></p>
+<p>Reference:<br><a href="http://bits.citrusbyte.com/extending-xcode-6-with-plugins/" target="_blank" rel="external">http://bits.citrusbyte.com/extending-xcode-6-with-plugins/</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/01/31/Xcode-Plugin-Development/" data-id="cik2kv62w0003u5fyamr0g76v" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/01/27/Security-in-iOS/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Security in iOS</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  
+    
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/01/31/Xcode-Plugin-Development/">Xcode Plugin Development</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/27/Security-in-iOS/">Security in iOS</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/18/使用NSBlockOperation实现异步多任务/">使用NSBlockOperation实现异步多任务</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/17/Weak-Array-in-Obj-C/">Weak Array in Obj-C</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/28/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Yong Lin<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>

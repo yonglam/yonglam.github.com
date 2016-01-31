@@ -61,6 +61,127 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Xcode-Plugin-Development" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/01/31/Xcode-Plugin-Development/" class="article-date">
+  <time datetime="2016-01-31T07:00:00.000Z" itemprop="datePublished">2016-01-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/01/31/Xcode-Plugin-Development/">Xcode Plugin Development</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Xcode有一套完整的插件框架，但是Apple没有开放出来。所以现在的插件的实现方式，是使用函数替换的方式替换Xcode的私有库的函数，来定制自己的功能。私有库主要是DVKit和IDEKit。</p>
+<p><strong>开发一个插件有如下过程：</strong></p>
+<ul>
+<li>首先，要明确需求，我们想做一个怎么样的功能，这个功能是否已经有类似的插件了？</li>
+<li>其次，如果有类似插件，那最happy了，可以在这个插件的基础上开发我们的功能，那下面列到的大部分步骤你都不用涉及到。否则就要按下面的步骤自己开发。即使在这种情况下，最好还是在github上找一个插件模板，或者在原有插件项目中抽出来的框架，上开发。</li>
+<li>再次，如果是自己开发，那就要看可能涉及到哪些xcode的逻辑、界面，然后利用下面的“前期准备”的方法来搜集相关素材。</li>
+<li>接着，就是开发和调试了。</li>
+<li>最后，写点脚本，发布给大家使用。</li>
+</ul>
+<h2 id="下面介绍重要环节的相关技术。">下面介绍重要环节的相关技术。</h2><h2 id="一、前期准备">一、前期准备</h2><p>这是最麻烦的过程。</p>
+<p>1.监听Notification：</p>
+<p>我们可以监听所有的Notification，从而获得</p>
+<ul>
+<li>用户操作的时机</li>
+<li>操作的UI控件（debugDescription可以得到更多的界面信息）</li>
+<li>操作的上下文</li>
+</ul>
+<p>2.Class-dump</p>
+<p>对于UI控件和一些Model对象，可能通过<a href="http://stevenygard.com/projects/class-dump/" target="_blank" rel="external">class-dump</a>找到其所有的接口。github上已经有人dump了<a href="https://github.com/luisobo/Xcode-RuntimeHeaders" target="_blank" rel="external">Xcode所有的类</a>。</p>
+<p>3.查看UI界面元素</p>
+<p>Github上的<a href="https://github.com/edwardaux/XcodeExplorer" target="_blank" rel="external">XcodeExplorer</a>可以方便查看XcodeUI元素。  （我还没测试过。。。）</p>
+<p>下面是在项目管理器上切换文件时收到的notification。<br><img src="/2016/01/31/Xcode-Plugin-Development/1.png" alt="image" title="image"></p>
+<h2 id="二、构建设置">二、构建设置</h2><p>如果你找到了一个类似的项目，或者在插件模板上开发，那这些设置你需要修改的就很少了。<br>下面这张图中，重要的几个参数：</p>
+<ul>
+<li>DVTPluginCompatibilityUUIDs，一个字符串数组，所有支持的Xcode版本的UUID。</li>
+<li>Principal class：字符串，插件的加载入口在这个类中。<img src="/2016/01/31/Xcode-Plugin-Development/2.png" alt="image" title="image">
+</li>
+</ul>
+<h2 id="三、调试设置">三、调试设置</h2><p>这样设置之后，build成功就可以调起Xcode来进行调试了。<br><img src="/2016/01/31/Xcode-Plugin-Development/3.png" alt="image" title="image"><br><img src="/2016/01/31/Xcode-Plugin-Development/4.png" alt="image" title="image"></p>
+<h2 id="四、开发">四、开发</h2><p>1  入口：这个类由plst中的Principal class来指定。建议采用单例模式。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">static</span> XCEPlugin *mySharedPlugin = <span class="literal">nil</span>;</span><br><span class="line"></span><br><span class="line">+(<span class="keyword">void</span>)pluginDidLoad:(<span class="built_in">NSBundle</span> *)plugin &#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">	<span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">		mySharedPlugin = [[<span class="keyword">self</span> alloc] init];</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+(XCEPlugin *)sharedPlugin &#123;</span><br><span class="line">	<span class="keyword">return</span> mySharedPlugin;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(<span class="keyword">id</span>)init &#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">self</span> = [<span class="keyword">super</span> init]) &#123;</span><br><span class="line">		[<span class="keyword">self</span> addMenuItems];</span><br><span class="line">		[<span class="keyword">self</span> setNotificationsController:<span class="literal">nil</span>];</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>2  举例1：弹窗口</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">-(<span class="keyword">void</span>)viewClickerMenuClicked:(<span class="keyword">id</span>)sender &#123;</span><br><span class="line">	<span class="keyword">if</span> ([<span class="keyword">self</span> viewClickerController] == <span class="literal">nil</span>) &#123;</span><br><span class="line">		[<span class="keyword">self</span> setViewClickerController:[[XCEViewClickerWindowController alloc] init]];</span><br><span class="line">	&#125;</span><br><span class="line">	[[<span class="keyword">self</span> viewClickerController] showWindow:[<span class="built_in">NSApp</span> mainWindow]];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>3  举例2：获得文本编辑器</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="built_in">NSWindowController</span> *currentWindowController = [[<span class="built_in">NSApp</span> keyWindow] windowController]; </span><br><span class="line"><span class="keyword">if</span> ([currentWindowController isKindOfClass:<span class="built_in">NSClassFromString</span>(<span class="string">@"IDEWorkspaceWindowController"</span>)]) &#123; </span><br><span class="line"> IDEWorkspaceWindowController *workspaceController = (IDEWorkspaceWindowController *)currentWindowController; </span><br><span class="line"> IDEEditorArea *editorArea = [workspaceController editorArea]; </span><br><span class="line"> IDEEditorContext *editorContext = [editorArea lastActiveEditorContext]; </span><br><span class="line"> IDESourceCodeEditor *editor = [editorContext editor]; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="五、发布配置（部署到当前插件目录）">五、发布配置（部署到当前插件目录）</h2><p>第2个红框，一起组成了部署路径： /Users/你的用户名/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins<br><img src="/2016/01/31/Xcode-Plugin-Development/5.png" alt="image" title="image"></p>
+<p>Reference:<br><a href="http://bits.citrusbyte.com/extending-xcode-6-with-plugins/" target="_blank" rel="external">http://bits.citrusbyte.com/extending-xcode-6-with-plugins/</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/01/31/Xcode-Plugin-Development/" data-id="cik2kv62w0003u5fyamr0g76v" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Security-in-iOS" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/01/27/Security-in-iOS/" class="article-date">
+  <time datetime="2016-01-27T02:16:41.000Z" itemprop="datePublished">2016-01-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/01/27/Security-in-iOS/">Security in iOS</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="为什么要重视iOS安全">为什么要重视iOS安全</h2><p>在某种程度上，iOS 仍然算是一个多用户系统。与 UNIX 设计的环境不同，iOS 所有用户访问的账号和手机持有者所操作的账号是同一个。所有这些用户都是手机账号的持有者，包括手机上所装应用的开发者以及苹果。</p>
+<p>这的确有点过于简单粗暴，毕竟许多应用的功能不止局限于开发者提交到应用商店的那些。SDK、远程分析服务以及开源组件意味着许多应用中实际上包含了来自多个机构的源码，并且必须通过网络进行通信就有潜在被监视的风险。游戏规则已经不再是保护不同的人彼此使用同一台计算机，而是保证同一个人的不同任务不会互相干扰。</p>
+<p>在安全性方面的比较，往往我们认为iOS要优于安卓。苹果告诉我们每一个版本的 iOS 都比过去更安全，甚至公布了一份系统安全特性细则的白皮书。在其中苹果介绍它如何使用了不断更新的（希望是更加先进的）加密算法和协议，更健壮的鉴定表单以及其他技术。</p>
+<p>但即使是最新版本的 iOS，拥有最新的工具和最新的编程语言，我们在其中所调用的方法，例如 C 语言的字符串库，也被认为在几十年前就需要被重构。操作系统只能提供适用任意应用的安全特性；但不能提供你的应用所需的一切。虽然苹果能告诉你，你的 app 连接到了一个提供了一些有效身份证明的服务器，但它不能告诉你这是否是一个值得你信任的身份。应用所接入的网络是否安全？它可能被监听了。</p>
+<p>安全是你应用程序架构的一部分：它是一个约束集合，你必须像顾虑 app 的响应时间、客户群的规模或者是外部系统的兼容性那样来考虑安全的问题。这意味着你必须将安全模块设计到你的应用中，就像你设计应用时遵循的其他约束条件一样。</p>
+<p>一个评估应用安全常用的设计技巧是风险建模 ：找到黑客们想要攻击你系统的原因，查出他们在使用现有的资源下的攻击方式，以及探索在系统设计中的可能被成功攻击的漏洞。</p>
+<p>尽管软件安全技术和系统（比如 iOS）的安全保障能力一直在进步和创新，但风险分析和设计安全对策依然是应用开发者们的责任。<strong>那些使用我们应用时所产生的风险是不可能通过操作系统供应商或者框架开发人员解决的。</strong>这些风险是由应用所提供给用户的功能，或者在应用部署的环境或系统中所产生的。</p>
+<p>以上引用自：<a href="http://objccn.io/issue-17-2/" target="_blank" rel="external">http://objccn.io/issue-17-2/</a></p>
+<p><br><br>下面的几个议题，接下来会解读和补充上来。</p>
+<h2 id="移动应用2015_top10安全问题">移动应用2015 top10安全问题</h2><p><a href="https://www.owasp.org/index.php/Projects/OWASP_Mobile_Security_Project_-2015_Scratchpad" target="_blank" rel="external">Mobile Security 2015</a></p>
+<h2 id="iOS的代码签名和沙盒机制">iOS的代码签名和沙盒机制</h2><p><a href="https://www.apple.com/business/docs/iOS_Security_Guide.pdf" target="_blank" rel="external">iOS的安全白皮书</a></p>
+<h2 id="iOS安全攻防">iOS安全攻防</h2><p><a href="http://wiki.jikexueyuan.com/project/ios-security-defense/" target="_blank" rel="external">攻与防</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/01/27/Security-in-iOS/" data-id="cik2kv62l0000u5fyq3ohwvit" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-使用NSBlockOperation实现异步多任务" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/01/18/使用NSBlockOperation实现异步多任务/" class="article-date">
@@ -95,7 +216,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/使用NSBlockOperation实现异步多任务/" data-id="cijiqx21t0000a9tr4dc8h4ku" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/使用NSBlockOperation实现异步多任务/" data-id="cik2kv62s0001u5fy92pefadc" class="article-share-link">Share</a>
       
       
     </footer>
@@ -138,7 +259,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/17/Weak-Array-in-Obj-C/" data-id="cijil3xb20001lmtrqlxnbuap" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/17/Weak-Array-in-Obj-C/" data-id="cik2kv63d0004u5fylip0rran" class="article-share-link">Share</a>
       
       
     </footer>
@@ -183,7 +304,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/28/hello-world/" data-id="cijil18wm0000lmtr09dud3uk" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/28/hello-world/" data-id="cik2kv62u0002u5fy0lxkc0yj" class="article-share-link">Share</a>
       
       
     </footer>
@@ -208,7 +329,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -218,6 +339,14 @@
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/01/31/Xcode-Plugin-Development/">Xcode Plugin Development</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/27/Security-in-iOS/">Security in iOS</a>
+          </li>
         
           <li>
             <a href="/2016/01/18/使用NSBlockOperation实现异步多任务/">使用NSBlockOperation实现异步多任务</a>
