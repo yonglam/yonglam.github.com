@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>加密&amp;签名 | No Fish</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="App需要使用的资源文件，一般都是从服务器下载下来。使用http协议或者socket长链接。这两种方式通过网络链路时都有可能被窃听、拦截、篡改。所以我们要对资源文件进行加密和签名。加密可以防止窃听，而签名可以确保来源正确从而防止篡改。
+加密如果我们只是为了防止窃听，那对资源文件进行加密就可以了。这样，窃听者得到的数据是加密过的，在他无法解密的前提下，数据对他是无用的。
+1  最简单的对称加密
+客户">
+<meta property="og:type" content="article">
+<meta property="og:title" content="加密&签名">
+<meta property="og:url" content="http://yoursite.com/2016/02/04/加密-签名/index.html">
+<meta property="og:site_name" content="No Fish">
+<meta property="og:description" content="App需要使用的资源文件，一般都是从服务器下载下来。使用http协议或者socket长链接。这两种方式通过网络链路时都有可能被窃听、拦截、篡改。所以我们要对资源文件进行加密和签名。加密可以防止窃听，而签名可以确保来源正确从而防止篡改。
+加密如果我们只是为了防止窃听，那对资源文件进行加密就可以了。这样，窃听者得到的数据是加密过的，在他无法解密的前提下，数据对他是无用的。
+1  最简单的对称加密
+客户">
+<meta property="og:updated_time" content="2016-02-04T12:46:37.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="加密&签名">
+<meta name="twitter:description" content="App需要使用的资源文件，一般都是从服务器下载下来。使用http协议或者socket长链接。这两种方式通过网络链路时都有可能被窃听、拦截、篡改。所以我们要对资源文件进行加密和签名。加密可以防止窃听，而签名可以确保来源正确从而防止篡改。
+加密如果我们只是为了防止窃听，那对资源文件进行加密就可以了。这样，窃听者得到的数据是加密过的，在他无法解密的前提下，数据对他是无用的。
+1  最简单的对称加密
+客户">
+  
+    <link rel="alternative" href="/atom.xml" title="No Fish" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">No Fish</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-加密-签名" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/02/04/加密-签名/" class="article-date">
+  <time datetime="2016-02-04T12:27:39.000Z" itemprop="datePublished">2016-02-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      加密&amp;签名
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>App需要使用的资源文件，一般都是从服务器下载下来。使用http协议或者socket长链接。这两种方式通过网络链路时都有可能被窃听、拦截、篡改。所以我们要对资源文件进行加密和签名。加密可以防止窃听，而签名可以确保来源正确从而防止篡改。</p>
+<h1 id="加密">加密</h1><p>如果我们只是为了防止窃听，那对资源文件进行加密就可以了。这样，窃听者得到的数据是加密过的，在他无法解密的前提下，数据对他是无用的。</p>
+<p><strong>1  最简单的对称加密</strong></p>
+<p>客户端和服务器事先约定一个密钥。服务器用这个密钥加密数据，下发到客户端后，客户端用相同的密钥解密。客户端向服务器发送数据也类似。经典是AES算法。</p>
+<p>这种方式简单易用，加解密速度快，而且密钥在双向通讯中都可以使用，但有两个缺点：一是密钥是写死在客户端中，反编译可以被获取到，从而被破解；二是更改密钥难度大，要客户端发版本。</p>
+<p><strong>2  非对称加密</strong></p>
+<p>客户端向服务器请求数据时：由客户端在运行时生成一对公私钥，然后把公钥发给服务器。服务器用公钥对数据进行加密，然后下发给客户端。客户端得到数据后，使用之前的私钥进行解密，得到数据。经典的算法有RSA、ECC。</p>
+<p>服务器向客户端请求数据时也大体相同。</p>
+<p>这种方式实现稍微复杂，加解密的时间成本也比较高，双向通讯时要维护两套密钥，但是客户端也不用写死密钥，安全级别高且机动灵活。有了效率起见，客户端也可以只是周期性地更新密钥。</p>
+<p><strong>3  对称和非对称相结合</strong></p>
+<p>对称加密效率高成本低，而非对称加密又灵活机动，如果两者相结合，取长补短，就能得到很好的效果。过程可以是：</p>
+<ul>
+<li>服务器生成公私钥(A、B)，把公钥B下发给客户端</li>
+<li>客户端拿到公钥B后，生成一个对称密钥C，并用公钥B加密得到数据D</li>
+<li>把数据D发给服务器，服务器拿到后，使用私钥A进行解密，得到密钥C</li>
+<li>之后双方就可以通过对称密钥C进行通讯了</li>
+</ul>
+<h1 id="签名">签名</h1><p>对数据进行加密让窃听者无法得到有用的信息，但当我们得到数据之后，我们怎么确保得到的数据就是我们的服务器发送的。如果数据在通讯过程被人修改过、破坏过，或者是第三方伪造成我们的服务器直接向我们发送数据，怎么办？上面这两种情况都可以看成同一个问题：数据来源不正确。</p>
+<p>这时就要用到电子签名。它的实现其实就是采用非称加密技术。</p>
+<ul>
+<li>首先，计算数据D的sha1（md5）；</li>
+<li>其次，生成一对公私钥（公钥A、私钥B）；</li>
+<li>接着，使用私钥B对sha1进行加密得到签名N；</li>
+<li>接着，把数据D、签名N同公钥B一起发给客户端；</li>
+<li>然后，客户端使用得到的公钥B对签名N进行解密得到sha1_new，同时计算数据D的sha1_old；</li>
+<li>最后，对sha1_new和sha1_old作比较，如果相同则证明来源合法，否则不合法：有可能被篡改过或者第三方伪造我们的服务器直接发送的数据。</li>
+</ul>
+<h1 id="总结">总结</h1><p>加密保护数据不被偷窥，而签名保证数据是“对的人”发送的。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/02/04/加密-签名/" data-id="cik899w6f00014qtrwi973i5m" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/01/31/Xcode-Plugin-Development/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Xcode Plugin Development</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  
+    
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">February 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">August 2015</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/02/04/加密-签名/">加密&amp;签名</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/31/Xcode-Plugin-Development/">Xcode Plugin Development</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/27/Security-in-iOS/">Security in iOS</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/18/使用NSBlockOperation实现异步多任务/">使用NSBlockOperation实现异步多任务</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/17/Weak-Array-in-Obj-C/">Weak Array in Obj-C</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Yong Lin<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>
